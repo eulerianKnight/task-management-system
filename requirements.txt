@@ -1,0 +1,44 @@
+# Core FastAPI dependencies
+fastapi
+uvicorn[standard]
+pydantic[email]
+pydantic-settings
+
+# Database
+sqlalchemy
+psycopg2-binary
+alembic
+
+# Redis
+redis
+
+# Authentication & Security
+PyJWT
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Background Task
+celery
+
+# File handling
+python-magic
+
+# AWS SDK
+boto3
+
+# Websocket support
+websockets
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+
+# Development
+black
+flake8
+mypy
+
+# Monitoring
+prometheus-client

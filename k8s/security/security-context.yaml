@@ -1,0 +1,30 @@
+# For FastAPI deployment - add this to the deployment spec
+securityContext:
+  # Pod-level security context
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+containers:
+- name: fastapi
+  # Container-level security context
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true  # Make filesystem read-only
+  
+  # Add this volume mount for writable tmp
+  volumeMounts:
+  - name: tmp-volume
+    mountPath: /tmp
+
+volumes:
+- name: tmp-volume
+  emptyDir: {}

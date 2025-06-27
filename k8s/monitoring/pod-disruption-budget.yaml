@@ -1,0 +1,22 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: task-management-api-pdb
+  namespace: task-management
+spec:
+  minAvailable: 1  # Always keep at least 1 pod running
+  selector:
+    matchLabels:
+      app: task-management-api
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-pdb
+  namespace: task-management
+spec:
+  maxUnavailable: 0  # Never disrupt database pods
+  selector:
+    matchLabels:
+      app: postgres

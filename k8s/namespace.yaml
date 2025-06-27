@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: task-management
+  labels:
+    name: task-management
+    environment: development
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: task-management-prod
+  labels:
+    name: task-management-prod
+    environment: production

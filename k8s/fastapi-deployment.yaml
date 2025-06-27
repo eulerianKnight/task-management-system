@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-management-api
+  namespace: task-management
+  labels:
+    app: task-management-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: task-management-api
+  template:
+    metadata:
+      labels:
+        app: task-management-api
+    spec:
+      containers:
+      - name: fastapi
+        image: 203918875586.dkr.ecr.us-east-1.amazonaws.com/task-management:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        
+        # Environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: task-management-config
+        
+        # Individual environment variables from secrets
+        env:
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: task-management-secrets
+              key: DATABASE_USER
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: task-management-secrets
+              key: DATABASE_PASSWORD
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: task-management-secrets
+              key: SECRET_KEY
+        
+        # Construct database URL from components
+        - name: DATABASE_URL
+          value: "postgresql://$(DATABASE_USER):$(DATABASE_PASSWORD)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)"
+        - name: REDIS_URL
+          value: "redis://$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)"
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 1
+          failureThreshold: 3
+        
+        # Startup probe for slow-starting applications
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 30  # Allow up to 5 minutes to start
+      
+      # Security context (run as non-root user)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      
+      # Restart policy
+      restartPolicy: Always
